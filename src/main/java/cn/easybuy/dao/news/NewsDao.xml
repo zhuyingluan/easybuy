@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.easybuy.dao.news.NewsDao">
+    <insert id="add" parameterType="News">
+        insert into easybuy_news
+            (title, content, createTime)
+            values
+            (#{title}, #{content}, #{createTime})
+    </insert>
+
+    <delete id="deleteById" parameterType="Integer">
+        delete from easybuy_news where id=#{id}
+    </delete>
+
+    <update id="update" parameterType="News">
+        update easybuy_news
+            <set>
+                <if test="title!=null and title!=''">
+                    title=#{title},
+                </if>
+                <if test="content!=null and content!=''">
+                    content=#{content},
+                </if>
+                <if test="createTime!=null">
+                    createTime=#{createTime},
+                </if>
+            </set>
+            where id=#{id}
+    </update>
+
+    <select id="getNewsById" resultType="News" parameterType="Integer">
+        select * from easybuy_news where id=#{id}
+    </select>
+
+    <select id="queryNewsList" resultType="News" parameterType="NewsParams">
+        select * from easybuy_news
+        <where>
+            <if test="title != null and title != ''">
+                and title like CONCAT('%',#{title},'%')
+            </if>
+        </where>
+        <if test="sort != null and sort != ''">
+            order by #{sort}
+        </if>
+        <if test="isPage">
+            limit #{startIndex},#{pageSize}
+        </if>
+    </select>
+    <select id="queryNewsCount" resultType="Integer" parameterType="NewsParams">
+        select count(*) from easybuy_news
+        <where>
+            <if test="title != null and title != ''">
+                and title like CONCAT('%',#{title},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

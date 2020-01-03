@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.easybuy.dao.product.ProductCategoryDao">
+    <insert id="add" parameterType="ProductCategory">
+        insert into easybuy_product_category
+            (name,parentId,type,iconClass)
+            values
+            (#{name},#{parentId},#{type},#{iconClass})
+    </insert>
+
+    <delete id="deleteById" parameterType="Integer">
+        delete from easybuy_product_category where id=#{id}
+    </delete>
+
+    <update id="update" parameterType="ProductCategory">
+        update easybuy_product_category
+            <set>
+                <if test="name != null and name != ''">
+                    name=#{name},
+                </if>
+                <if test="parentId != null">
+                    parentId=#{parentId},
+                </if>
+                <if test="type != null">
+                    type=#{type},
+                </if>
+                <if test="iconClass != null and iconClass != ''">
+                    iconClass=#{iconClass},
+                </if>
+            </set>
+            where id=#{id}
+    </update>
+
+    <select id="queryProductCategoryById" resultType="ProductCategory" parameterType="Integer">
+        select * from easybuy_product_category where id=#{id}
+    </select>
+
+    <select id="queryProductCategoryCount" resultType="Integer" parameterType="ProductCategoryParam">
+        select count(*) from easybuy_product_category
+        <where>
+            <if test="name != null and name != ''">
+                and name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="parentId != null">
+                and parentId=#{parentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryProductCategoryList" resultType="ProductCategory" parameterType="ProductCategoryParam">
+        SELECT epc1.*,epc2.name as parentName
+        FROM easybuy_product_category epc1
+        LEFT JOIN easybuy_product_category epc2
+        ON epc1.parentId=epc2.id
+        <where>
+            <if test="name != null and name != ''">
+                and epc1.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="parentId != null and parentId != 0">
+                and epc1.parentId=#{parentId}
+            </if>
+            <if test="type != null">
+                and epc1.type=#{type}
+            </if>
+        </where>
+        <if test="isPage">
+            limit #{startIndex},#{pageSize}
+        </if>
+    </select>
+</mapper>

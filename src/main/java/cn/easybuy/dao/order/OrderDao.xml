@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.easybuy.dao.order.OrderDao">
+    <resultMap id="base" type="Order">
+        <id property="id" column="id" />
+        <result property="userId" column="userId" />
+        <result property="loginName" column="loginName" />
+        <result property="userAddress" column="userAddress" />
+        <result property="createTime" column="createTime" />
+        <result property="cost" column="cost" />
+        <result property="serialNumber" column="serialNumber" />
+    </resultMap>
+    <resultMap id="orderDetail" type="Order" extends="base">
+        <collection property="orderDetailList" ofType="OrderDetail" resultMap="cn.easybuy.dao.order.OrderDetailDao.base" columnPrefix="od_" />
+    </resultMap>
+
+    <insert id="add" parameterType="Order">
+        insert into easybuy_order
+        (userId,loginName,userAddress,createTime,cost,serialNumber)
+        values
+        (#{userId},#{loginName},#{userAddress},#{createTime},#{cost},#{serialNumber})
+    </insert>
+
+    <delete id="deleteById" parameterType="Integer">
+        delete from easybuy_order where id=#{id}
+    </delete>
+
+    <select id="getOrderById" resultMap="orderDetail" parameterType="Integer">
+        select o.*,od.id as od_id,od.orderId as od_orderId,od.productId as od_productId,
+            od.quantity as od_quantity,od.cost as od_cost
+        from easybuy_order as o
+        inner join easybuy_order_detail as od
+        on o.id=od.orderId
+        where o.id=#{id}
+    </select>
+
+    <select id="count" resultType="Integer" parameterType="Integer">
+        select count(*) from easybuy_order
+        <where>
+            <if test="userId != null">
+                userId=#{userId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getOrderList" resultMap="orderDetail">
+        select o.*,od.id as od_id,od.orderId as od_orderId,od.productId as od_productId,
+            od.quantity as od_quantity,od.cost as od_cost
+        from easybuy_order as o
+        inner join easybuy_order_detail as od
+        on o.id=od.orderId
+        <where>
+            <if test="userId != null">
+                userId=#{userId}
+            </if>
+        </where>
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <select id="getOrderBySerialNumber" resultType="order" parameterType="String">
+        select * from easybuy_order
+        where serialNumber=#{serialNumber}
+    </select>
+</mapper>

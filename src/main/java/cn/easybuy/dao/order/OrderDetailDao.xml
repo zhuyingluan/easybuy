@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.easybuy.dao.order.OrderDetailDao">
+    <resultMap id="base" type="OrderDetail">
+        <id property="id" column="id" />
+        <result property="orderId" column="orderId" />
+        <result property="productId" column="productId" />
+        <result property="quantity" column="quantity" />
+        <result property="cost" column="cost" />
+    </resultMap>
+    <resultMap id="product" type="OrderDetail" extends="base">
+        <association property="product" javaType="Product" resultMap="cn.easybuy.dao.product.ProductDao.base" columnPrefix="p_" />
+    </resultMap>
+
+    <insert id="add" parameterType="OrderDetail">
+        insert into easybuy_order_detail
+        (orderId,productId,quantity,cost)
+        values
+        (#{orderId},#{productId},#{quantity},#{cost})
+    </insert>
+
+    <delete id="deleteById" parameterType="OrderDetail">
+        delete from easybuy_order_detail where id=#{id}
+    </delete>
+
+    <select id="getOrderDetailById" resultMap="product" parameterType="Integer">
+        select od.*,p.id as p_id,p.name as p_name,p.description as p_description,p.price as p_price,
+            p.stock as p_stock,p.categoryLevel1Id as p_categoryLevel1Id,
+            p.categoryLevel2Id as p_categoryLevel2Id,p.categoryLevel3Id as p_categoryLevel3Id,
+            p.fileName as p_fileName,p.isDelete as p_isDelete
+        from easybuy_order_detail as od
+        inner join easybuy_product as p
+        on od.productId=p.id
+        where id=#{id}
+    </select>
+
+    <select id="getOrderDetailList" resultMap="product" parameterType="Integer">
+        select od.*,p.id as p_id,p.name as p_name,p.description as p_description,p.price as p_price,
+            p.stock as p_stock,p.categoryLevel1Id as p_categoryLevel1Id,
+            p.categoryLevel2Id as p_categoryLevel2Id,p.categoryLevel3Id as p_categoryLevel3Id,
+            p.fileName as p_fileName,p.isDelete as p_isDelete
+        from easybuy_order_detail as od
+        inner join easybuy_product as p
+        on od.productId=p.id
+        <where>
+            <if test="orderId != null">
+                od.orderId=#{orderId}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryOrderDetailCount" resultType="Integer" parameterType="OrderDetailParam">
+        select count(*) from easybuy_order_detail
+    </select>
+</mapper>
